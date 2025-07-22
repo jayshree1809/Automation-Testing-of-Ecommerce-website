@@ -1,0 +1,129 @@
+package test;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import loginpage.LoginPage;
+import utils.WebDriverFactory;
+
+public class LoginTest1 {
+	WebDriver driver;
+	private WebDriverWait wait;
+	
+		 @BeforeMethod
+		    public void setup() {
+		        driver = WebDriverFactory.createDriver();
+		        driver.manage().window().maximize();
+		        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		        driver.get("https://magento.softwaretestingboard.com/");
+		    }
+
+		@Test(description = "Verify login with valid credentials")
+		 
+		    public void testValidLogin() {
+		        driver.get("https://magento.softwaretestingboard.com/customer/account/login/");
+		        LoginPage loginPage = new LoginPage(driver);
+		        loginPage.login("arjitutkarsh@gmail.com", "123@Arjit");
+		        Assert.assertTrue(driver.getTitle().contains("My Account"));
+		    }
+
+		    @Test(description = "Search for a valid product")
+		    public void testProductSearch() {
+		        WebElement searchBox = driver.findElement(By.id("search"));
+		        searchBox.sendKeys("jacket");
+		        searchBox.submit();
+		        WebElement productList = driver.findElement(By.cssSelector(".products.wrapper.grid.products-grid"));
+		        Assert.assertTrue(productList.isDisplayed());
+		        
+		    }
+	
+		    @Test(description = "Apply size filters")
+		    public void testFilterFunctionality() {
+		        driver.get("https://magento.softwaretestingboard.com/men/tops-men/jackets-men.html");
+		      
+		        driver.findElement(By.xpath("//*[@id=\"narrow-by-list\"]/div[2]/div[1]")).click();		        
+		        driver.findElement(By.xpath("//*[@id=\"narrow-by-list\"]/div[2]/div[2]/div/div/a[3]/div")).click();	      
+		        
+		        WebElement filteredResult = driver.findElement(By.cssSelector(".products.wrapper.grid.products-grid"));
+		        Assert.assertTrue(filteredResult.isDisplayed());
+		    }
+
+		 @Test(description = "Apply price filters")
+		    public void testFilterFunctionality1() {
+		        driver.get("https://magento.softwaretestingboard.com/men/tops-men/jackets-men.html");
+		        //handlePopupIfPresent();
+
+		        WebElement priceFilter = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id='narrow-by-list']/div[11]/div[1]")));
+		        priceFilter.click();
+
+		        WebElement priceRange = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id='narrow-by-list']/div[11]/div[2]/ol/li[2]/a")));
+		        priceRange.click();
+
+		        WebElement filteredResult = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".products.wrapper.grid.products-grid")));
+		        Assert.assertTrue(filteredResult.isDisplayed());
+		    }
+		    
+		 @Test(description = "Add product to cart and update quantity")
+		 public void testAddToCartAndQuantityUpdate() {	
+		        
+		     driver.get("https://magento.softwaretestingboard.com/men/tops-men/jackets-men.html");
+		     driver.findElement(By.xpath("//*[@id=\"maincontent\"]/div[3]/div[1]/div[3]/ol/li[2]/div/a/span/span/img")).click();	     
+		     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		     WebElement sizeOption = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"option-label-size-143-item-168\"]")));
+		     sizeOption.click(); 
+     	                 
+		      WebElement colorOption = wait.until(ExpectedConditions.elementToBeClickable(By.id("option-label-color-93-item-53")));
+		     colorOption.click();	     
+		     WebElement qty = driver.findElement(By.id("qty"));
+		     qty.clear();
+		     qty.sendKeys("2");
+
+
+		      driver.findElement(By.xpath("//*[@id=\"product-addtocart-button\"]/span")).submit();
+	      
+		 }
+
+	
+	    @Test(description = "Complete checkout with valid address")
+	    		    public void testCheckoutProcess() throws InterruptedException  {
+       driver.get("https://magento.softwaretestingboard.com/customer/account/login/");
+	        LoginPage loginPage = new LoginPage(driver);
+	        loginPage.login("arjitutkarsh@gmail.com", "123@Arjit");
+	        Assert.assertTrue(driver.getTitle().contains("My Account"));
+		        driver.get("https://magento.softwaretestingboard.com/checkout/");
+		        Thread.sleep(3000); 
+	      
+	
+		       
+		        WebElement creditCardRadio = driver.findElement(By.xpath("//*[@id=\"checkout-shipping-method-load\"]/table/tbody/tr[2]/td[1]/input"));
+		        creditCardRadio.click();    
+
+		  
+	
+		        driver.findElement(By.cssSelector("button.continue")).click();
+	
+		       Thread.sleep(3000); 
+
+		        driver.findElement(By.cssSelector("button.action.primary.checkout")).click();
+	
+		       
+		    }
+	 
+	
+		    @AfterMethod
+		    public void tearDown() {
+		        if (driver != null) {
+		            driver.quit();
+		        }
+		    }
+
+}
